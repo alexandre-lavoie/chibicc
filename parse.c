@@ -17,6 +17,7 @@
 // parser.
 
 #include "chibicc.h"
+#include "config.h"
 
 // Scope for local variables, global variables, typedefs
 // or enum constants
@@ -2372,7 +2373,7 @@ static Node *new_add(Node *lhs, Node *rhs, Token *tok) {
   }
 
   // ptr + num
-  rhs = new_binary(ND_MUL, rhs, new_long(lhs->ty->base->size, tok), tok);
+  rhs = new_binary(ND_MUL, rhs, new_long(MAX(lhs->ty->base->size / NUM_BYTE_AT_ADDRESS, 1), tok), tok);
   return new_binary(ND_ADD, lhs, rhs, tok);
 }
 

@@ -1,21 +1,22 @@
 #include "chibicc.h"
+#include "config.h"
 
 Type *ty_void = &(Type){TY_VOID, 1, 1};
-Type *ty_bool = &(Type){TY_BOOL, 1, 1};
+Type *ty_bool = &(Type){TY_BOOL, TY_BOOL_SIZE, TY_BOOL_ALIGN};
 
-Type *ty_char = &(Type){TY_CHAR, 1, 1};
-Type *ty_short = &(Type){TY_SHORT, 2, 2};
-Type *ty_int = &(Type){TY_INT, 4, 4};
-Type *ty_long = &(Type){TY_LONG, 8, 8};
+Type *ty_char = &(Type){TY_CHAR, TY_CHAR_SIZE, TY_CHAR_ALIGN};
+Type *ty_short = &(Type){TY_SHORT, TY_SHORT_SIZE, TY_SHORT_ALIGN};
+Type *ty_int = &(Type){TY_INT, TY_INT_SIZE, TY_INT_ALIGN};
+Type *ty_long = &(Type){TY_LONG, TY_LONG_SIZE, TY_LONG_ALIGN};
 
-Type *ty_uchar = &(Type){TY_CHAR, 1, 1, true};
-Type *ty_ushort = &(Type){TY_SHORT, 2, 2, true};
-Type *ty_uint = &(Type){TY_INT, 4, 4, true};
-Type *ty_ulong = &(Type){TY_LONG, 8, 8, true};
+Type *ty_uchar = &(Type){TY_CHAR, TY_CHAR_SIZE, TY_CHAR_ALIGN, true};
+Type *ty_ushort = &(Type){TY_SHORT, TY_SHORT_SIZE, TY_SHORT_ALIGN, true};
+Type *ty_uint = &(Type){TY_INT, TY_INT_SIZE, TY_INT_ALIGN, true};
+Type *ty_ulong = &(Type){TY_LONG, TY_LONG_SIZE, TY_LONG_ALIGN, true};
 
-Type *ty_float = &(Type){TY_FLOAT, 4, 4};
-Type *ty_double = &(Type){TY_DOUBLE, 8, 8};
-Type *ty_ldouble = &(Type){TY_LDOUBLE, 16, 16};
+Type *ty_float = &(Type){TY_FLOAT, TY_FLOAT_SIZE, TY_FLOAT_ALIGN};
+Type *ty_double = &(Type){TY_DOUBLE, TY_DOUBLE_SIZE, TY_DOUBLE_ALIGN};
+Type *ty_ldouble = &(Type){TY_LDOUBLE, TY_LDOUBLE_SIZE, TY_LDOUBLE_ALIGN};
 
 static Type *new_type(TypeKind kind, int size, int align) {
   Type *ty = calloc(1, sizeof(Type));
@@ -25,22 +26,22 @@ static Type *new_type(TypeKind kind, int size, int align) {
   return ty;
 }
 
-bool is_integer(Type *ty) {
+bool is_integer(const Type *ty) {
   TypeKind k = ty->kind;
   return k == TY_BOOL || k == TY_CHAR || k == TY_SHORT ||
          k == TY_INT  || k == TY_LONG || k == TY_ENUM;
 }
 
-bool is_flonum(Type *ty) {
+bool is_flonum(const Type *ty) {
   return ty->kind == TY_FLOAT || ty->kind == TY_DOUBLE ||
          ty->kind == TY_LDOUBLE;
 }
 
-bool is_numeric(Type *ty) {
+bool is_numeric(const Type *ty) {
   return is_integer(ty) || is_flonum(ty);
 }
 
-bool is_compatible(Type *t1, Type *t2) {
+bool is_compatible(const Type *t1, const Type *t2) {
   if (t1 == t2)
     return true;
 
@@ -95,7 +96,7 @@ Type *copy_type(Type *ty) {
 }
 
 Type *pointer_to(Type *base) {
-  Type *ty = new_type(TY_PTR, 8, 8);
+  Type *ty = new_type(TY_PTR, TY_PTR_SIZE, TY_PTR_ALIGN);
   ty->base = base;
   ty->is_unsigned = true;
   return ty;
@@ -117,7 +118,7 @@ Type *array_of(Type *base, int len) {
 }
 
 Type *vla_of(Type *base, Node *len) {
-  Type *ty = new_type(TY_VLA, 8, 8);
+  Type *ty = new_type(TY_VLA, TY_PTR_SIZE, TY_PTR_ALIGN);
   ty->base = base;
   ty->vla_len = len;
   return ty;
@@ -147,9 +148,9 @@ static Type *get_common_type(Type *ty1, Type *ty2) {
   if (ty1->kind == TY_FLOAT || ty2->kind == TY_FLOAT)
     return ty_float;
 
-  if (ty1->size < 4)
+  if (ty1->size < TY_INT_SIZE)
     ty1 = ty_int;
-  if (ty2->size < 4)
+  if (ty2->size < TY_INT_SIZE)
     ty2 = ty_int;
 
   if (ty1->size != ty2->size)

@@ -1,3 +1,6 @@
+#ifndef CHIBICC_H
+#define CHIBICC_H
+
 #define _POSIX_C_SOURCE 200809L
 #include <assert.h>
 #include <ctype.h>
@@ -17,6 +20,8 @@
 #include <sys/wait.h>
 #include <time.h>
 #include <unistd.h>
+
+#include "config.h"
 
 #define MAX(x, y) ((x) < (y) ? (y) : (x))
 #define MIN(x, y) ((x) < (y) ? (x) : (y))
@@ -391,10 +396,10 @@ extern Type *ty_float;
 extern Type *ty_double;
 extern Type *ty_ldouble;
 
-bool is_integer(Type *ty);
-bool is_flonum(Type *ty);
-bool is_numeric(Type *ty);
-bool is_compatible(Type *t1, Type *t2);
+bool is_integer(const Type *ty);
+bool is_flonum(const Type *ty);
+bool is_numeric(const Type *ty);
+bool is_compatible(const Type *t1, const Type *t2);
 Type *copy_type(Type *ty);
 Type *pointer_to(Type *base);
 Type *func_type(Type *return_ty);
@@ -455,3 +460,5 @@ extern StringArray include_paths;
 extern bool opt_fpic;
 extern bool opt_fcommon;
 extern char *base_file;
+
+#endif /* CHIBICC_H */
